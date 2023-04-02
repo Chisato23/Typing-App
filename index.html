@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typing App</title>
+  </head>
+  <style>
+    :root {
+      --grey: rgba(171, 173, 195, 0.77);
+    }
+    .typing-grid {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      color: rgba(0, 255, 255, 0.527);
+      border: solid;
+    }
+
+    .typing-grid > button {
+      font-size: 5rem;
+      background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.71),
+        rgba(0, 41, 128, 0.589)
+      );
+      border-color: rgba(0, 255, 255, 0.527);
+    }
+    body {
+      display: grid;
+      justify-content: center;
+      font-family: "Open Sans", sans-serif;
+      background: rgb(38, 47, 71);
+    }
+
+    .result_Div {
+      font-size: 1.2rem;
+      padding-left: 5px;
+      padding-left: 10px;
+      border: 1px;
+      border: solid;
+      border-top-style: none;
+      background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.222),
+        var(--grey),
+        rgba(0, 0, 0, 0.152)
+      );
+      color: rgb(211, 211, 211);
+      border-color: rgba(0, 255, 255, 0.527);
+    }
+
+    .game-over {
+      text-align: center;
+      font-size: 1.5rem;
+      background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.71),
+        rgba(45, 194, 204, 0.801),
+        rgba(0, 0, 0, 0.71)
+      );
+    }
+
+    #newGame,
+    .menu_Difficulty_Level button {
+      border-radius: 1vw;
+    }
+    .menu_Difficulty_Level button {
+      display: none;
+    }
+    #newGame {
+      background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.71),
+        var(--grey),
+        rgba(0, 0, 0, 0.71)
+      );
+      font-size: 1.5rem;
+      border-color: rgba(0, 255, 255, 0.527);
+    }
+
+    #newGame:hover,
+    #newGame:focus-visible {
+      font-size: 1.5rem;
+      background-color: rgba(3, 25, 34, 0.988);
+      color: rgba(226, 43, 171, 0.749);
+    }
+
+    #newGame:hover + .newGameDropDown,
+    #newGame:focus-visible + .newGameDropDown {
+      background: var(--grey);
+    }
+    .newGameDropDown {
+      display: grid;
+      border-radius: 0.25rem;
+      padding-left: 0.25rem;
+      background: white;
+      box-shadow: 0 5px 5px 0 rgb(0, 0, 0, 0.5);
+      display: none;
+    }
+    .menu_Difficulty_Level {
+      display: grid;
+    }
+    .game-over:hover {
+      background-color: rgba(209, 217, 59, 0.663);
+    }
+
+    #Easy {
+      background: hsl(120, 100%, 25%);
+      font-size: 1.2rem;
+    }
+    #Expert {
+      background: rgb(228, 161, 44);
+      font-size: 1.2rem;
+    }
+    #Master {
+      background: rgba(204, 61, 9, 0.863);
+      font-size: 1.2rem;
+    }
+    #Easy:hover,
+    #Expert:hover,
+    #Master:hover {
+      background: rgba(3, 25, 34, 0.988);
+      color: rgb(226, 43, 171);
+      font-size: 1.5rem;
+    }
+  </style>
+  <body>
+    <div class="typing-grid">
+      <button class="typing-grid-btn" id="btn1">!!</button>
+      <button class="typing-grid-btn" id="btn2">!!</button>
+      <button class="typing-grid-btn" id="btn3">!!</button>
+      <button class="typing-grid-btn" id="btn4">!!</button>
+      <button class="typing-grid-btn" id="btn5">!!</button>
+      <button class="typing-grid-btn" id="btn6">!!</button>
+      <button class="typing-grid-btn" id="btn7">!!</button>
+      <button class="typing-grid-btn" id="btn8">!!</button>
+      <button class="typing-grid-btn" id="btn9">!!</button>
+    </div>
+
+    <div class="result_Div">
+      <!-- <div id="correctKey_Count_Div">correctKey_Count_Div</div>
+      <div id="wrongKey_Count_Div">wrongKey_Count_Div</div> -->
+      <div id="accuracy_Div">Accuracy</div>
+
+      <div id="score_Div">Score</div>
+      <div id="allTimeHighScore_Div">All Time-HighScore</div>
+    </div>
+
+    <div class="game-over" id="game-over"></div>
+
+    <button id="newGame">Start A New Game</button>
+    <div class="newGameDropDown" id="newGameDropDown">
+      <h3>How To Play:</h3>
+      <p>
+        Letters appear on a set interval.<br />
+        Type to make the letter dissapear.<br />
+        Each matching letter will net you 1 point.<br />
+        The game is over when all 9 slots are filled.
+      </p>
+    </div>
+
+    <div class="menu_Difficulty_Level">
+      <button id="Easy">Easy Mode</button>
+      <button id="Expert">Expert Mode</button>
+      <button id="Master">Grand Master</button>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", keyInput);
+
+      //random number
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+      }
+      //keyboardInput
+      function keyInput() {
+        document.body.addEventListener("keydown", getKeyInput);
+      }
+
+      const global = {
+        gg: "gg",
+        gameStarted: false,
+        score: 0,
+        allTimeHighScore: 0,
+        correctKey_Count: 0,
+        wrongKey_Count: 0,
+        accuracyStat: 0,
+        allBtnArr: [],
+        level: {
+          easyLevel: ["a", "b", "c"],
+          masterLevel: [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z",
+          ],
+        },
+      };
+
+      const globalTimer = {
+        halfSeconds: 500,
+        oneSecond: 1000,
+        twoSeconds: 2000,
+      };
+
+      function allBtn_func() {
+        let allBtn = document.querySelectorAll(".typing-grid-btn");
+        return allBtn;
+      }
+
+      function getKeyInput(ev) {
+        let char = ev.key;
+        let allBtn = allBtn_func();
+
+        for (let eachBtn of allBtn) {
+          if (eachBtn.innerHTML === char) {
+            global.score++;
+            // console.log(global.score);
+            document.getElementById(
+              "score_Div"
+            ).innerHTML = `SCORE: ${global.score}`;
+          }
+          if (char === eachBtn.innerHTML) {
+            eachBtn.innerHTML = "!!";
+          }
+        }
+
+        let allBtnArr = global.allBtnArr;
+
+        if (global.gameStarted === true) {
+          accuratcyStat();
+        }
+
+        //accuratcyStat
+        function accuratcyStat() {
+          if (allBtnArr.includes(char)) {
+            global.correctKey_Count++;
+          } else {
+            global.wrongKey_Count++;
+          }
+
+          global.accuracyStat = Math.floor(
+            (global.correctKey_Count /
+              (global.correctKey_Count + global.wrongKey_Count)) *
+              100
+          );
+          document.getElementById(
+            "accuracy_Div"
+          ).innerHTML = `Accuracy: ${global.accuracyStat}%`;
+          console.log("accuratcyStat running");
+        }
+      }
+
+      //empty_btn_Check
+      let empty_btn_Check = function () {
+        let allBtn = allBtn_func();
+        let empty_btn_Check_Arr = [];
+        allBtn.forEach(x => {
+          if (x.innerHTML === "!!") {
+            empty_btn_Check_Arr.push(x.id);
+          }
+        });
+        // console.log(empty_btn_Check_Arr);
+        return empty_btn_Check_Arr;
+      };
+
+      //get random empty button
+      let getRandomEmptyButton = function () {
+        let empty_btn_Check_Arr = empty_btn_Check();
+        let randomEmptyButton;
+        if (empty_btn_Check_Arr.length > 0) {
+          randomEmptyButton =
+            empty_btn_Check_Arr[getRandomInt(empty_btn_Check_Arr.length)];
+        }
+        // console.log("randombtn" + randomEmptyButton);
+        return randomEmptyButton;
+      };
+
+      //generate text
+      function generateText(difficultyLevel) {
+        empty_btn_Check();
+        getRandomEmptyButton();
+        let randomEmptyButton = getRandomEmptyButton();
+        console.log("generateText Running");
+
+        if (randomEmptyButton !== undefined) {
+          document.getElementById(randomEmptyButton).innerHTML =
+            difficultyLevel[getRandomInt(difficultyLevel.length)];
+        }
+      }
+
+      //gameOver_Check
+
+      function gameOver_Check() {
+        let allBtn = allBtn_func();
+        let allBtnArrUpdate = [];
+        allBtn.forEach(x => allBtnArrUpdate.push(x.innerHTML));
+        // console.log(allBtnArrUpdate);
+
+        let allFilled;
+        if (allBtnArrUpdate.includes("!!")) {
+          allFilled = false;
+        } else {
+          allFilled = true;
+        }
+
+        console.log("allFilled" + allFilled);
+        if (allFilled === true) {
+          document.getElementById("game-over").innerHTML = "Game Over";
+          document.getElementById("game-over").style.display = "block";
+        }
+        global.gg = allFilled; //all buttons filled= game over
+        global.allBtnArr = allBtnArrUpdate;
+      }
+
+      //empty all buttons
+      function resetAllButtons() {
+        let allBtn = allBtn_func();
+        for (let eachBtn of allBtn) {
+          eachBtn.innerHTML = "!!";
+        }
+      }
+
+      //allTimeHighScore
+      function allTimeHighScore() {
+        let allTimeHighScore =
+          localStorage.getItem("allTimeHighScore") || global.allTimeHighScore;
+        if (global.score > allTimeHighScore) {
+          localStorage.setItem("allTimeHighScore", global.score);
+        }
+        global.score = 0;
+        document.getElementById(
+          "allTimeHighScore_Div"
+        ).innerHTML = `All Time-HighScore: ${localStorage.getItem(
+          "allTimeHighScore"
+        )}`;
+      }
+
+      //Choose difficulty level
+      const difficulty = {
+        easyLevel: function easyLevel() {
+          startBtn(globalTimer.twoSeconds, global.level.easyLevel);
+        },
+        expertLevel: function expertLevel() {
+          startBtn(globalTimer.oneSecond, global.level.masterLevel);
+        },
+        masterLevel: function masterLevel() {
+          startBtn(globalTimer.halfSeconds, global.level.masterLevel);
+        },
+      };
+
+      // new game click to start, then choose difficulty
+
+      document
+        .getElementById("Easy")
+        .addEventListener("click", difficulty.easyLevel);
+      document
+        .getElementById("Expert")
+        .addEventListener("click", difficulty.expertLevel);
+      document
+        .getElementById("Master")
+        .addEventListener("click", difficulty.masterLevel);
+
+      //CSS
+      document.getElementById("newGame").addEventListener("mouseenter", () => {
+        document.getElementById("newGameDropDown").style.display = "block";
+      });
+      document.getElementById("newGame").addEventListener("mouseleave", () => {
+        document.getElementById("newGameDropDown").style.display = "none";
+      });
+
+      document.getElementById("newGame").addEventListener("click", () => {
+        document.getElementById("newGame").style.display = "none";
+      });
+      document.getElementById("newGame").addEventListener("click", () => {
+        document.getElementById("game-over").style.display = "none";
+      });
+
+      document.getElementById("newGame").addEventListener("click", () => {
+        document.getElementById("Easy").style.display = "block";
+      });
+
+      document.getElementById("newGame").addEventListener("click", () => {
+        document.getElementById("Expert").style.display = "block";
+      });
+
+      document.getElementById("newGame").addEventListener("click", () => {
+        document.getElementById("Master").style.display = "block";
+      });
+
+      //hide difficulty btns after choosing levels
+      function hideBtns(clickbtn, hidebtn) {
+        document.getElementById(clickbtn).addEventListener("click", () => {
+          document.getElementById(hidebtn).style.display = "none";
+        });
+      }
+
+      hideBtns("Easy", "Easy");
+      hideBtns("Easy", "Expert");
+      hideBtns("Easy", "Master");
+      hideBtns("Expert", "Easy");
+      hideBtns("Expert", "Expert");
+      hideBtns("Expert", "Master");
+      hideBtns("Master", "Easy");
+      hideBtns("Master", "Expert");
+      hideBtns("Master", "Master");
+
+      //start btn, run setInterval
+      function startBtn(speed, level) {
+        global.gameStarted = true;
+        global.accuracyStat = 0;
+        document.getElementById("accuracy_Div").innerHTML = "Accuracy";
+
+        document.getElementById(
+          "score_Div"
+        ).innerHTML = `SCORE: ${global.score}`;
+        function stopInterval() {
+          console.log("gameOver_Check" + global.gg);
+          if (global.gg) {
+            setTimeout(resetAllButtons, globalTimer.halfSeconds);
+            allTimeHighScore();
+            global.allBtnArr = [];
+            clearInterval(set_gameOver_Check);
+            clearInterval(set_generateText);
+            clearInterval(set_stopInterval);
+
+            document.getElementById("newGame").style.display = "block";
+            global.gameStarted = false;
+          }
+        }
+
+        let set_generateText = setInterval(generateText, speed, level);
+        let set_gameOver_Check = setInterval(gameOver_Check, speed);
+        let set_stopInterval = setInterval(stopInterval, speed);
+      }
+    </script>
+  </body>
+</html>
